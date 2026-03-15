@@ -11,7 +11,7 @@ import { FiSearch } from "react-icons/fi";
 import { HiMenu, HiX } from "react-icons/hi"; // Import menu and close icons
 import logo from "../assets/iron_manlogo.jpg";
 import toast from "react-hot-toast";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { BACKEND_URL } from "../../utils/utils";
 
 
