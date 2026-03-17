@@ -76,36 +76,72 @@ export const createCourse = async (req, res) => {
     });
   }
 };
-export const updateCourse=async(req,res)=>{
-    console.log("courseRoute module setup complete");
-    const {courseId}=req.params
-    const {title,description,price,image}=req.body;
-    const adminId=req.adminId
-    try {
-        const course=await Course.updateOne({_id:courseId},{
-            title,description,price,
-            image:{
-                public_id: image?.public_id ,
-                url:image?.url 
-            },
-            updatedBy:adminId,
-        })
-        res.json({
-            message:"Course updated successfully",
-            course,
-            updatedBy:adminId,
-        })
-    } catch (error) {
-        return res.status(500).json({
-            error: error.message,
-          });
+export const updateCourse = async (req, res) => {
+  const { courseId } = req.params;
+  const adminId = req.adminId;
+  const { title, description, price } = req.body;
+
+  try {
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ error: "Course not found" });
     }
+
+    course.title = title;
+    course.description = description;
+    course.price = price;
+    course.updatedBy = adminId;
+
+    if (req.files && req.files.image) {
+      const image = req.files.image;
+
+      const allowedFormats = ["image/jpeg", "image/png", "image/jpg"];
+      if (!allowedFormats.includes(image.mimetype)) {
+        return res.status(400).json({ error: "Only jpeg, png and jpg formats are allowed" });
+      }
+
+      if (course.image?.public_id) {
+        await cloudinary.uploader.destroy(course.image.public_id);
+      }
+
+      const result = await cloudinary.uploader.upload(image.tempFilePath, {
+        folder: "course-app",
+      });
+
+      if (!result?.public_id || !result?.secure_url) {
+        return res.status(500).json({ error: "Image upload failed" });
+      }
+
+      course.image = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
+      course.markModified("image");
+    }
+
+    await course.save();
+
+    res.status(200).json({
+      message: "Course updated successfully",
+      course,
+    });
+
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
 };
 export const deleteCourse=async(req,res)=>{
     const {courseId}=req.params
     const adminId=req.adminId
     try {
-        const course=await Course.findOneAndDeletedeleteOne({_id:courseId})
+        const course=await Course.findOneAndDelete({_id:courseId,
+        createdBy:adminId
+        })
+        if(!course){
+            return res.status(404).json({
+                error:"Course not found or you are not authorized to delete this course",
+            })
+        }
         res.json({
             message:"Course deleted successfully",
             _id:courseId,
@@ -115,6 +151,7 @@ export const deleteCourse=async(req,res)=>{
     } catch (error) {
         res.status(500).json({
             error:error.message,
+            errorIn:"deleteCourse controller",
         })
     }
 };

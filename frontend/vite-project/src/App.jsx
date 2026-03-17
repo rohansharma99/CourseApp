@@ -14,12 +14,14 @@ import Dashboard from './admin/Dashboard'
 import CourseCreate from './admin/CourseCreate'
 import UpdateCourse from './admin/UpdateCourses'
 import OurCourses from './admin/OurCourses'
+import Welcome from './components/Welcome'
 function App() {
    const admin = JSON.parse(localStorage.getItem("admin"));
   return (
     <div>
         <Routes>
-          <Route path="/" element={<Home/>}/>
+          <Route path="/" element={<Welcome/>}/>
+          <Route path="/home" element={<Home/>}/>
           <Route path="/login" element={<Login/>}/>
           <Route path="/signup" element={<Signup/>}/>
           <Route path="/getAll" element={<Courses/>}/>

@@ -18,15 +18,20 @@ function UpdateCourse() {
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
-        const { data } = await axios.get(`${BACKEND_URL}/Course/${id}`, {
+        const { data } = await axios.get(`${BACKEND_URL}/Course/getCourse/${id}`, {
           withCredentials: true,
         });
         console.log(data);
         setTitle(data.course.title);
         setDescription(data.course.description);
         setPrice(data.course.price);
-        setImage(data.course.image.url);
-        setImagePreview(data.course.image.url);
+
+        // ✅ safe check before accessing image.url
+        if (data.course.image && data.course.image.url) {
+          setImage(data.course.image.url);
+          setImagePreview(data.course.image.url);
+        }
+
         setLoading(false);
       } catch (error) {
         console.log(error);
@@ -46,6 +51,7 @@ function UpdateCourse() {
       setImage(file);
     };
   };
+
   const handleUpdateCourse = async (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -53,7 +59,7 @@ function UpdateCourse() {
     formData.append("description", description);
     formData.append("price", price);
     if (image) {
-      formData.append("imageUrl", image);
+      formData.append("image", image); // ✅ fixed "imageUrl" → "image"
     }
     const admin = JSON.parse(localStorage.getItem("admin"));
     const token = admin.token;
@@ -72,10 +78,10 @@ function UpdateCourse() {
           withCredentials: true,
         }
       );
-      toast.success(response.data.message || "Course updated successfully22");
-      navigate("/admin/our-courses"); // Redirect to courses page after update
+      toast.success(response.data.message || "Course updated successfully");
+      navigate("/admin/our-courses");
     } catch (error) {
-      console.error(error);
+      console.error("error"+ error.response.data);
       toast.error(error.response.data.errors);
     }
   };

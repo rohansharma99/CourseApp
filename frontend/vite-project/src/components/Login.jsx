@@ -1,14 +1,17 @@
+// 
+
 import React, { useState } from "react";
 import logo from '../assets/iron_manlogo.jpg'
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { BACKEND_URL } from "../../utils/utils";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const navigate = useNavigate();
@@ -32,106 +35,136 @@ function Login() {
       );
       console.log("Login successful: ", response.data);
       toast.success(response.data.message);
-      // Keep existing behavior for token-based auth
       localStorage.setItem("user", response.data.token);
-      // Store user profile data for UI and payment metadata
       localStorage.setItem("userData", JSON.stringify(response.data.user));
-      navigate("/");
+      navigate("/home");
     } catch (error) {
       if (error.response) {
         setErrorMessage(error.response.data.errors || "Login failed!!!");
-        error.response.data.errors          ? toast.error(error.response.data.errors)
-          : toast.error("Login failed!!!");
-      }
-      else {
+        toast.error(error.response.data.errors || "Login failed!!!");
+      } else {
         toast.error("Login failed!!!");
-        error.response.data.errors || "Login failed!!!";
       }
     }
   };
 
   return (
-    <div className="bg-linear-to-r from-blue-500 to-blue-950 ">
-      <div className="h-screen container mx-auto flex  items-center justify-center text-white">
-        {/* Header */}
-        <header className="absolute top-0 left-0 w-full flex justify-between items-center p-5  ">
-          <div className="flex items-center space-x-2">
-            <img src={logo} alt="Logo" className="w-10 h-10 rounded-full" />
-            <Link to={"/"} className="text-xl font-bold text-orange-500">
-              TechMorph
+    <div className="login-root">
+      {/* Decorative Blobs */}
+      <div className="blob blob-1"></div>
+      <div className="blob blob-2"></div>
+      <div className="blob blob-3"></div>
+
+      {/* Header */}
+      <header className="auth-header">
+        <div className="auth-header-inner">
+          <div className="auth-brand">
+            <img src={logo} alt="TechMorph" className="auth-logo-img" />
+            <Link to="/" className="auth-brand-name">TechMorph</Link>
+          </div>
+          <div className="auth-nav-links">
+            <Link to="/signup" className="auth-link-btn">
+              Create Account
+            </Link>
+            <Link to="/" className="auth-home-btn">
+              Back Home
             </Link>
           </div>
-          <div className="flex items-center space-x-4">
-            <Link
-              to={"/signup"}
-              className="bg-transparent border border-gray-500 p-1 text-sm md:text-md md:py-2 md:px-4 rounded-md"
-            >
-              Signup
-            </Link>
-            <Link
-              to={"/Courses"}
-              className="bg-orange-500 p-1 text-sm md:text-md md:py-2 md:px-4 rounded-md"
-            >
-              Join now
-            </Link>
-          </div>
-        </header>
+        </div>
+      </header>
 
-        {/* Login Form */}
-        <div className="bg-gray-900 p-8 rounded-lg shadow-lg w-125 m-8 md:m-0 mt-20">
-          <h2 className="text-2xl font-bold mb-4 text-center">
-            Welcome to <span className="text-orange-500">TechMorph</span>
-          </h2>
-          <p className="text-center text-gray-400 mb-6">
-            Log in to access paid content!
-          </p>
-
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label htmlFor="email" className=" text-gray-400 mb-2">
-                Email
-              </label>
-              <input
-                type="text"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-3 rounded-md bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="name@email.com"
-                required
-              />
+      {/* Main Content */}
+      <div className="auth-container">
+        <div className="auth-card">
+          {/* Welcome Section */}
+          <div className="auth-welcome">
+            <div className="auth-icon-ring">
+              <span className="auth-icon-badge">🔐</span>
             </div>
-            <div className="mb-4">
-              <label htmlFor="password" className=" text-gray-400 mb-2">
+            <h1 className="auth-title">Welcome Back</h1>
+            <p className="auth-subtitle">Log in to your TechMorph account</p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="auth-form">
+            {/* Email Field */}
+            <div className="form-group">
+              <label htmlFor="email" className="form-label">
+                Email Address
+              </label>
+              <div className="form-input-wrap">
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="form-input"
+                  placeholder="you@example.com"
+                  required
+                />
+                <span className="form-icon">✉️</span>
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div className="form-group">
+              <label htmlFor="password" className="form-label">
                 Password
               </label>
-              <div className="relative">
+              <div className="form-input-wrap">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 rounded-md bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="********"
+                  className="form-input"
+                  placeholder="••••••••"
                   required
                 />
-                <span className="absolute right-3 top-3 text-gray-500 cursor-pointer">
-                  👁️
-                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="form-toggle-btn"
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
               </div>
             </div>
+
+            {/* Error Message */}
             {errorMessage && (
-              <div className="mb-4 text-red-500 text-center">
-                {errorMessage}
+              <div className="form-error">
+                <span>⚠️ {errorMessage}</span>
               </div>
             )}
-            <button
-              type="submit"
-              className="w-full bg-orange-500 hover:bg-blue-600 text-white py-3 px-6 rounded-md transition"
-            >
-              Login
+
+            {/* Remember & Forgot */}
+            <div className="form-footer-options">
+              <label className="form-checkbox">
+                <input type="checkbox" />
+                <span>Remember me</span>
+              </label>
+              <Link to="#" className="form-forgot-link">
+                Forgot password?
+              </Link>
+            </div>
+
+            {/* Submit Button */}
+            <button type="submit" className="form-submit-btn">
+              Sign In
+              <span className="btn-arrow">→</span>
             </button>
           </form>
+
+          {/* Divider */}
+          <div className="auth-divider">
+            <span>New to TechMorph?</span>
+          </div>
+
+          {/* Signup Link */}
+          <Link to="/signup" className="auth-switch-btn">
+            Create a new account
+          </Link>
         </div>
       </div>
     </div>

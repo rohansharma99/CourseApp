@@ -64,7 +64,7 @@ function OurCourses() {
     <div className="bg-gray-100 p-8 space-y-4">
       <h1 className="text-3xl font-bold text-center mb-8">Our Courses</h1>
       <Link
-        className="bg-orange-400 py-2 px-4 rounded-lg text-white hover:bg-orange-950 duration-300"
+        className="bg-blue-800 py-2 px-4 rounded-md text-white hover:bg-orange-950 duration-300 block w-max mx-auto mb-6"
         to={"/admin/dashboard"}
       >
         Go to dashboard
