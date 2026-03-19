@@ -77,12 +77,12 @@ try {
     process.env.JWT_ADMIN_PASSWORD,
     {expiresIn:"10w"}
     )  
-    const cookieOptions={
-        expires:new Date(Date.now()+7*24*60*60*1000), //7 days
-        httpOnly:true, //cookie cannot be accessed by client-side by JavaScript
-        secure:process.env.NODE_ENV==="production", //true for https and false for http
-        sameSite:"strict",
-    }
+   const cookieOptions = {
+  expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",  // ✅ keep this
+  sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict", // ✅ fix this
+};
     res.cookie("token",token,cookieOptions); 
 
     res.status(201).json({
