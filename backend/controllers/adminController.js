@@ -59,46 +59,40 @@ export const singup=async(req,res)=>{
      })
     }
 }
-export const login=async(req,res)=>{
-const {email,password}=req.body
-try {
-    const admin=await Admin.findOne({email:email})
-        const isPasswordValid=await bcrypt.compare(password,admin.password)
-        if(!isPasswordValid || !admin){
-            return res.status(400).json({
-                error:"Invalid credentials",
-            })
-        }
-
-  // Generate JWT token
-    const token=jwt.sign({
-        id:admin._id,
-    },
-    process.env.JWT_ADMIN_PASSWORD,
-    {expiresIn:"10w"}
-    )  
-   const cookieOptions = {
-  expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",  // ✅ keep this
-  sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict", // ✅ fix this
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const admin = await Admin.findOne({ email }).select("+password"); // ✅ Fix 1
+    if (!admin) {                                                      // ✅ Fix 2
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
+    const isPasswordValid = await bcrypt.compare(password, admin.password); // ✅ Fix 3
+    if (!isPasswordValid) {
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
+    const token = jwt.sign(
+      { id: admin._id },
+      process.env.JWT_ADMIN_PASSWORD,
+      { expiresIn: "10w" }
+    );
+    const cookieOptions = {
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict",
+    };
+    res.cookie("token", token, cookieOptions);
+    admin.password = undefined;                                        // ✅ Fix 4
+    return res.status(200).json({                                      // ✅ Fix 5
+      message: "Login successful",
+      admin,
+      token,
+    });
+  } catch (error) {
+    console.error("ADMIN LOGIN ERROR:", error.message);
+    return res.status(500).json({ error: error.message });
+  }
 };
-    res.cookie("token",token,cookieOptions); 
-
-    res.status(201).json({
-        message:"Login successful",
-        admin,
-        token,
-        cookieOptions,
-    })
-
-    
-} catch (error) {
-    res.status(500).json({
-        error:error.message,    
- }) 
-}
-}
 export const logout=async(req,res)=>{
     try {
         if (!req.cookies || !req.cookies.token) {

@@ -60,46 +60,48 @@ export const singup=async(req,res)=>{
      })
     }
 }
-export const login=async(req,res)=>{
-const {email,password}=req.body
-try {
-    const user=await User.findOne({email:email})
-        const isPasswordValid=await bcrypt.compare(password,user.password)
-        if(!isPasswordValid || !user){
-            return res.status(400).json({
-                error:"Invalid credentials",
-            })
-        }
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
 
-  // Generate JWT token
-    const token=jwt.sign({
-        id:user._id,
-    },
-    process.env.JWT_SECRET,
-    {expiresIn:"10weeks"}
-    )  
-    const cookieOptions = {
-  expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",  // ✅ keep this
-  sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict", // ✅ fix this
-};
-    res.cookie("token",token,cookieOptions); 
-
-    res.status(201).json({
-        message:"Login successful",
-        user,
-        token,
-        cookieOptions,
-    })
-
+    const user = await User.findOne({ email }).select("+password"); // ✅ CHANGE 1
     
-} catch (error) {
-    res.status(500).json({
-        error:error.message,    
- }) 
-}
-}
+    if (!user) {                                                     // ✅ CHANGE 2
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password); // ✅ CHANGE 3
+    if (!isPasswordValid) {
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
+
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "10weeks" }
+    );
+
+    const cookieOptions = {
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict",
+    };
+
+    res.cookie("token", token, cookieOptions);
+    user.password = undefined;                                       // ✅ CHANGE 4
+
+    return res.status(200).json({                                    // ✅ CHANGE 5
+      message: "Login successful",
+      user,
+      token,
+    });
+
+  } catch (error) {
+    console.error("LOGIN ERROR:", error.message);
+    return res.status(500).json({ error: error.message });
+  }
+};
 export const logout=async(req,res)=>{
     
     res.clearCookie("token")
