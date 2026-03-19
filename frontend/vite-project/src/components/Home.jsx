@@ -475,7 +475,9 @@ const Home = () => {
                   <p className="course-desc">{course.description}</p>
                   <div className="course-footer">
                     <span className="course-price">Rs. {course.price}</span>
-                    <button className="btn-enroll">Enroll Now</button>
+                    <button className="btn-enroll" onClick={() => navigate(`/buy/${course._id}`)}>
+                      Enroll Now
+                    </button>
                   </div>
                 </div>
               </div>

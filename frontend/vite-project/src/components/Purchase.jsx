@@ -175,7 +175,7 @@ function Purchases() {
                         : purchase.description}
                     </p>
                     <span className="text-green-700 font-semibold text-sm">
-                      ${purchase.price} only
+                      {purchase.price} only
                     </span>
                   </div>
                 </div>
