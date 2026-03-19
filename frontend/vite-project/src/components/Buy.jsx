@@ -38,7 +38,7 @@ function Buy() {
             withCredentials: true, // Include cookies if needed
           }
         );
-        console.log(response.data);
+        // console.log(response.data);
         setCourse(response.data.course);
         setClientSecret(response.data.clientSecret);
         setLoading(false);

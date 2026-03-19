@@ -33,7 +33,7 @@ function Login() {
           },
         }
       );
-      console.log("Login successful: ", response.data);
+      // console.log("Login successful: ", response.data);
       toast.success(response.data.message);
       localStorage.setItem("user", response.data.token);
       localStorage.setItem("userData", JSON.stringify(response.data.user));
