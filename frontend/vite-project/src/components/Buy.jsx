@@ -157,7 +157,7 @@ function Buy() {
             </div>
             <div className="flex items-center text-center space-x-2">
               <h1 className="text-gray-600 text-sm">Course name</h1>
-              <p className="text-red-500 font-bold">{course.title}</p>
+              <p className="text-red-500 font-bold">Rs. {course.title}</p>
             </div>
           </div>
           <div className="w-full md:w-1/2 flex justify-center items-center">
